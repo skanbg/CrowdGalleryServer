@@ -17,15 +17,18 @@ module.exports = function (app) {
                     console.log(fields);
                     console.log(files);
                     console.log(err);
-                    if (!files.image) {
+
+                    if (!files.image && !fields.image) {
                         return next(new MissingImageError());
                     }
 
+                    var parsedFile = fields.image || files.image;
+
                     var opts = {
-                        content_type: files.image.type
+                        content_type: parsedFile.type
                     };
 
-                    Image.add(data.user, fields.title, files.image, opts)
+                    Image.add(data.user, fields.title, parsedFile, opts)
                         .then(function (createdImage) {
                             createdImage.save(function (err) {
                                 res.json({
