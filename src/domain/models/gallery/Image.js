@@ -52,14 +52,17 @@ var ImageModel = function () {
         var gridIn = new GridStore(db, newImage.id, image.name, "w", options)
             .open(function (err, file) {
                 if (err) {
+                    console.log('Error - open');
                     return deferred.reject(err);
                 }
 
                 return file.writeFile(image.path, function (err, savedImage) {
                     if (err) {
+                        console.log('error - write');
                         deferred.reject(err);
                     }
 
+                    console.log('Attaching');
                     newImage.file = savedImage.fileId;
                     deferred.resolve(newImage);
                 });
