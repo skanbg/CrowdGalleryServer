@@ -27,7 +27,6 @@ var ImageModel = function () {
     var imageSchema = mongoose.Schema({
         title: {
             type: String,
-            required: true,
             default: ''
         },
         file: {type: mongoose.Schema.Types.ObjectId},
