@@ -34,9 +34,11 @@ module.exports = function (config, app) {
             });
         }
 
-        return errorHandler(res, 400, {
-            name: 'GeneralAppError'
-        });
+        //return errorHandler(res, 400, {
+        //    name: 'GeneralAppError'
+        //});
+
+        next(err);
     });
 
 };

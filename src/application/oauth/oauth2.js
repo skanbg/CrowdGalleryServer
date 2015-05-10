@@ -28,7 +28,7 @@ exports.token = [
             }
 
             if (!user) {
-                return next(new errors.IncorrectLoginDetails());
+                return next(new errors.InvalidCredentialsError());
             }
 
             req.logIn(user, function (err) {
