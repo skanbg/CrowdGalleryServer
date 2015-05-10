@@ -30,7 +30,10 @@ module.exports = function (app) {
 
                     Image.add(data.user, fields.title, parsedFile, opts)
                         .then(function (createdImage) {
+                            console.log('create - passed');
                             createdImage.save(function (err) {
+                                console.log('save');
+                                console.log(arguments);
                                 res.json({
                                     image: {
                                         id: createdImage.id,
