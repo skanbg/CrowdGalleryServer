@@ -14,6 +14,9 @@ module.exports = function (app) {
                 var form = new formidable.IncomingForm();
 
                 form.parse(req, function (err, fields, files) {
+                    console.log(fields);
+                    console.log(files);
+                    console.log(err);
                     if (!files.image) {
                         return next(new MissingImageError());
                     }
