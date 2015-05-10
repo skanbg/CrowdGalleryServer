@@ -16,7 +16,11 @@ var UserModel = function () {
         lastName: {type: String, required: true},
         email: {type: String, unique: true},
         password: {type: String},
-        role: String
+        role: String,
+        created: {
+            type: Date,
+            default: Date.now
+        }
     });
 
     userSchema.pre('save', function (next) {

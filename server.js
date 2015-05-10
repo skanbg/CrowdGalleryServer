@@ -12,9 +12,9 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
+require('./config/corsConfiguration')(config, app);
 require('./config/crypto')(config);
 require('./config/db')(config);
-require('./config/corsConfiguration')(config, app);
 require('./config/sessionConfiguration')(config, app);
 require('./config/passportConfiguration')(config, app);
 require('./config/commandsConfiguration')();
