@@ -2,6 +2,7 @@ var commander = require('../../src/infrastructure/commands/Commander'),
     commandsList = require('../../src/application/commands'),
     formidable = require('formidable'),
     Image = require('../../src/domain/models/gallery/Image'),
+    Comment = require('../../src/domain/models/gallery/Comment'),
     MissingImageError = require('../../src/application/errors/index').MissingImageError,
     bearerAuthenticator = require('../../src/application/oauth/bearerAuthenticator');
 
@@ -58,9 +59,25 @@ module.exports = function (app) {
                     .find({}, {}, {limit: 10})
                     .sort({'created': 'desc'})
                     .populate({
-                        path: 'file',
-                        select: 'title file created'
+                        path: 'user',
+                        select: 'firstName lastName'
                     })
+                    .exec(function (err, images) {
+                        res.json({
+                            lastUploads: images
+                        })
+                    });
+            }, function (err) {
+                next(err);
+            });
+    });
+
+    app.get('/personal', function (req, res, next) {
+        bearerAuthenticator(req, res, next)
+            .then(function (data) {
+                Image
+                    .find({user: data.user}, {}, {limit: 10})
+                    .sort({'created': 'desc'})
                     .populate({
                         path: 'user',
                         select: 'firstName lastName'
@@ -75,32 +92,76 @@ module.exports = function (app) {
             });
     });
 
-    app.get('/image/:id', function (req, res, next) {
+    app.get('/image/view/:id', function (req, res, next) {
         //bearerAuthenticator(req, res, next)
         //    .then(function (data) {
-                Image
-                    .getFile(req.params.id)
-                    .then(function (file) {
-                        res.writeHead('200', {'Content-Type': 'image/png'});
-                        res.end(file,'binary');
-                        //res.setHeader('Content-Length', file.length);
-                        //res.setHeader('Content-Disposition', 'inline; filename="' + 'img1.gif' + '"');
-                        //res.setHeader('Content-Type', file['contentType']);
-                        //file.pipe(res);
-                        //console.log(file);
-                        //var stream = file.stream(true);
-                        //console.log(stream);
-                        //console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+        Image
+            .getFile(req.params.id)
+            .then(function (file) {
+                res.writeHead('200', {'Content-Type': 'image/png'});
+                res.end(file, 'binary');
+            })
+            .catch(function (err) {
+                console.log(err);
+                next(err);
+            });
+        //}, function (err) {
+        //    next(err);
+        //});
+    });
 
-                        //var img = new Buffer(file, 'base64');
-                        //res.end('data:image/gif;base64,' +img);
-                        //res.send(file);
+    app.get('/image/:id', function (req, res, next) {
+        bearerAuthenticator(req, res, next)
+            .then(function (data) {
+                Image
+                    .findOne(req.params.id, function (err, result) {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        res.json(result);
                     })
-                    .catch(function (err) {
-                        next(err);
+            }, function (err) {
+                next(err);
+            });
+    });
+
+    app.get('/image/:id/comments', function (req, res, next) {
+        bearerAuthenticator(req, res, next)
+            .then(function (data) {
+                Comment
+                    .find({image: req.params.id})
+                    .sort({'created': 'desc'})
+                    .populate({
+                        path: 'user',
+                        select: 'firstName lastName'
+                    })
+                    .exec(function (err, result) {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        res.json(result);
+                    })
+            }, function (err) {
+                next(err);
+            });
+    });
+
+    app.post('/image/:id/comment/add', function (req, res, next) {
+        bearerAuthenticator(req, res, next)
+            .then(function (data) {
+                Comment
+                    .add(data.user, req.params.id, req.body.commentBody)
+                    .save(function (err, result) {
+                        if (err) {
+                            return next(err);
+                        }
+
+                        res.json(result);
                     });
-            //}, function (err) {
-            //    next(err);
-            //});
+            }, function (err) {
+                next(err);
+            });
     });
 };

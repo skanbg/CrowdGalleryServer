@@ -99,11 +99,10 @@ var ImageModel = function () {
 
         options = parse(options);
         options.metadata.filename = image.name;
-        options.dater = new Date();
 
         var fileId = mongoose.Types.ObjectId();
 
-        var gridStore = new GridStore(db, fileId, "w");
+        var gridStore = new GridStore(db, fileId, "w", options);
         gridStore.open(function (err, gridStore) {
             if (err) {
                 console.log('Error - open');
@@ -119,7 +118,7 @@ var ImageModel = function () {
                     }
 
                     console.log('Attaching');
-                    newImage.file = gridStore.fileId;
+                    newImage.file = fileId;
                     deferred.resolve(newImage);
                 });
             });
@@ -134,14 +133,8 @@ var ImageModel = function () {
     imageSchema.static('getFile', function (fileId) {
         var deferred = Q.defer();
 
-        console.log('In ' + fileId);
-        var _id = '1431232379751.jpg';
-        //var gridStore2 = new GridStore(db, new mongoose.ObjectId(fileId), "r");
         var gfs = Grid(db, mongoose.mongo);
-        console.log('Testtt');
         var id = gfs.tryParseObjectId(fileId);
-        console.log('BIn ');
-        //note that options now includes 'root'
         var options = {_id: id};
 
         //var gridStore2 = new GridStore(db, id, 'r');
@@ -214,21 +207,18 @@ var ImageModel = function () {
 
         var gridStore2 = new GridStore(db, id, "r");
         gridStore2.open(function (err, gridStore) {
-            if(err){
+            if (err) {
                 return deferred.reject(err);
             }
 
             gridStore.seek(0, function () {
                 gridStore.read(function (err, data) {
-                    console.log(arguments);
                     if (err) {
                         console.log('Error - open');
 
                         return deferred.reject(err);
                     }
 
-                    //console.log(arguments);
-                    //var stream = data.stream(true);
                     deferred.resolve(data);
                 });
             });
